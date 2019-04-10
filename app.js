@@ -1,8 +1,8 @@
 const express = require('express');
 const Playlist = require('./models/playlist');
-const Artist = require('./models/artist'); 
-const Album = require('./models/album'); 
-const Track = require('./models/track'); 
+const Artist = require('./models/artist');
+const Album = require('./models/album');
+const Track = require('./models/track');
 const bodyParser = require('body-parser');
 
 const Sequelize = require('sequelize');
@@ -45,7 +45,7 @@ app.post('/api/artists', function(request, response) {
 
 app.patch('/api/tracks/:id', function(request, response){
   let { id } = request.params; //destructuring
-  
+
   Track.findByPk(id).then((track) => {
     if (track) {
       track.name = request.body.name;
@@ -55,7 +55,7 @@ app.patch('/api/tracks/:id', function(request, response){
         response.json(track)
         response.status(200).send();
       }, (validation) => {
-        response.json({
+        response.status(422).json({
           errors: validation.errors.map((error) => {
             return {
               attribute: error.path,
@@ -64,18 +64,18 @@ app.patch('/api/tracks/:id', function(request, response){
           })
         });
       });
-    } else { 
+    } else {
       response.status(404).send();
     }
   }, (errors) => {
     response.status(500).send()
-  }); 
+  });
 });
 
 app.get('/api/playlists', function(request, response){
   let filter = {};
   let { q } = request.query;
-  
+
   if (q){
     filter = {
       where: {
@@ -85,67 +85,67 @@ app.get('/api/playlists', function(request, response){
       }
     };
   }
-  
+
   Playlist.findAll(filter).then((playlists) => {
       response.json(playlists);
-  }); 
+  });
 
 });
 
 app.get('/api/playlists/:id', function(request, response){
   let { id } = request.params; //destructuring
-  
+
   Playlist.findByPk(id,{
-    include: [Track] 
+    include: [Track]
   }).then((playlist) => {
     if (playlist) {
       response.json(playlist);
-    } else { 
+    } else {
       response.status(404).send();
     }
-  }); 
-}); 
+  });
+});
 
 app.get('/api/tracks/:id', function(request, response){
   let { id } = request.params; //destructuring
-  
+
   Track.findByPk(id,{
-    include: [Playlist] 
+    include: [Playlist]
   }).then((track) => {
     if (track) {
       response.json(track);
-    } else { 
+    } else {
       response.status(404).send();
     }
-  }); 
+  });
 });
 
 app.get('/api/artists/:id', function(request, response){
   let { id } = request.params; //destructuring
-  
+
   Artist.findByPk(id, {
     include: [Album]
   }).then((artist) => {
     if (artist) {
       response.json(artist);
-    } else { 
+    } else {
       response.status(404).send();
     }
-  }); 
+  });
 });
 
 app.get('/api/albums/:id', function(request, response){
   let { id } = request.params; //destructuring
-  
+
   Album.findByPk(id, {
     include: [Artist]
   }).then((album) => {
     if (album) {
       response.json(album);
-    } else { 
+    } else {
       response.status(404).send();
     }
-  }); 
+  });
 });
 
 
